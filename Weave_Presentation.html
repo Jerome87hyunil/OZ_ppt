@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weave - 프리랜서를 위한 통합 비즈니스 플랫폼 (개선안)</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* CSS Reset and Base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Improved CSS Variables */
+        :root {
+            --background: 220 20% 98%;
+            --foreground: 220 15% 15%;
+            --card: 0 0% 100%;
+            --card-foreground: 220 15% 20%;
+            --primary: 175, 70%, 45%;
+            --primary-foreground: 0 0% 100%;
+            --secondary: 210, 60%, 55%;
+            --secondary-foreground: 0 0% 100%;
+            --muted: 220 20% 94%;
+            --muted-foreground: 220 10% 40%;
+            --destructive: 0, 72%, 51%;
+            --border: 220 15% 88%;
+            --ring: 175, 70%, 45%;
+            
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --radius: 0.75rem;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: hsl(var(--background));
+            color: hsl(var(--foreground));
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Gradient Background Overlay */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, 
+                hsla(var(--primary), 0.05) 0%, 
+                hsla(var(--secondary), 0.05) 100%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Presentation Container */
+        .presentation-wrapper {
+            position: relative;
+            width: 90vw;
+            max-width: 1280px;
+            aspect-ratio: 16 / 10;
+            z-index: 1;
+        }
+
+        .presentation-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background: hsl(var(--card));
+            border: 1px solid hsl(var(--border));
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+
+        /* Slides */
+        .slide {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            padding: 3rem 4rem;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            visibility: hidden;
+            transform: scale(0.98) translateY(10px);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1) translateY(0);
+        }
+        
+        /* Entrance animations for slide content */
+        .animated-item {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        .slide.active .animated-item {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        /* Staggered animation delays */
+        .slide.active .animated-item:nth-child(1) { transition-delay: 0.2s; }
+        .slide.active .animated-item:nth-child(2) { transition-delay: 0.3s; }
+        .slide.active .animated-item:nth-child(3) { transition-delay: 0.4s; }
+        .slide.active .animated-item:nth-child(4) { transition-delay: 0.5s; }
+        .slide.active .animated-item:nth-child(5) { transition-delay: 0.6s; }
+
+
+        /* Navigation Controls */
+        .nav-container {
+            display: flex; gap: 1rem; margin-top: 1.5rem; align-items: center; z-index: 10;
+        }
+        .nav-btn {
+            background: hsl(var(--card)); color: hsl(var(--card-foreground)); border: 1px solid hsl(var(--border)); padding: 0.5rem 1.5rem;
+            border-radius: calc(var(--radius) * 0.75); cursor: pointer; font-size: 0.9rem; font-weight: 500; transition: all 0.2s;
+            display: inline-flex; align-items: center; gap: 0.5rem; box-shadow: var(--shadow-sm);
+        }
+        .nav-btn:hover:not(:disabled) { background: hsl(var(--muted)); box-shadow: var(--shadow-md); transform: translateY(-2px); }
+        .nav-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .nav-btn.primary { background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); border-color: transparent; }
+        .nav-btn.primary:hover:not(:disabled) { background: hsla(var(--primary), 0.9); }
+        .slide-counter { background: hsl(var(--muted)); color: hsl(var(--muted-foreground)); padding: 0.5rem 1rem; border-radius: calc(var(--radius) * 0.75); font-size: 0.9rem; font-weight: 500; }
+
+        /* Progress Bar */
+        .progress-bar { position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: hsl(var(--muted)); z-index: 2; }
+        .progress-fill { height: 100%; background: hsl(var(--primary)); transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        /* Typography */
+        h1, h2, h3, h4 { color: hsl(var(--foreground)); font-weight: 700; }
+        h1 { font-size: 3rem; line-height: 1.1; margin-bottom: 1.5rem; }
+        h2 { font-size: 2rem; line-height: 1.2; margin-bottom: 1.5rem; letter-spacing: -0.02em; }
+        h3 { font-size: 1.5rem; line-height: 1.3; margin-bottom: 1rem; font-weight: 600; }
+        h4 { font-size: 1.125rem; line-height: 1.4; margin-bottom: 0.75rem; font-weight: 600; }
+        p { font-size: 1rem; line-height: 1.7; margin-bottom: 1rem; color: hsl(var(--muted-foreground)); }
+        ul, ol { margin: 0 0 1rem 1.25rem; color: hsl(var(--muted-foreground)); }
+        li { font-size: 1rem; line-height: 1.7; margin-bottom: 0.5rem; }
+        strong { font-weight: 600; color: hsl(var(--card-foreground)); }
+
+        /* Icon Styles */
+        .icon { display: inline-block; width: 1em; height: 1em; margin-right: 0.5rem; vertical-align: -0.125em; }
+
+        /* Special Slide Styles */
+        .slide-cover { justify-content: center; align-items: center; text-align: center; }
+        .slide-cover h1 {
+            font-size: 4.5rem; font-weight: 800;
+            background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 1rem;
+        }
+        .slide-cover .subtitle { font-size: 1.75rem; color: hsl(var(--foreground)); font-weight: 500; margin-bottom: 1rem; }
+        .slide-cover .description { font-size: 1.25rem; color: hsl(var(--muted-foreground)); max-width: 600px; margin: 0 auto 2.5rem; }
+        .slide-cover .team { margin-top: 2.5rem; padding: 1rem 2rem; background: hsla(var(--card), 0.5); backdrop-filter: blur(5px); border: 1px solid hsl(var(--border)); border-radius: var(--radius); }
+        .slide-cover .team p { text-align: center; margin-bottom: 0; }
+
+        /* General UI Elements */
+        .card { background: hsl(var(--card)); border: 1px solid hsl(var(--border)); border-radius: var(--radius); padding: 1.5rem; box-shadow: var(--shadow-md); transition: transform 0.2s, box-shadow 0.2s; }
+        .card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+        .card h3 { color: hsl(var(--primary)); margin-bottom: 0.75rem; font-size: 1.4rem; }
+        
+        table { width: 100%; border-collapse: separate; border-spacing: 0; margin: 1.5rem 0; border: 1px solid hsl(var(--border)); border-radius: var(--radius); overflow: hidden; font-size: 0.9rem; }
+        th, td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid hsl(var(--border)); }
+        th { background: hsl(var(--muted)); font-weight: 600; }
+        tr:last-child td { border-bottom: none; }
+        th.highlight { background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); }
+
+        .code-block { background: #282c34; color: #abb2bf; padding: 1.25rem; border-radius: var(--radius); margin: 1rem 0; font-family: 'Menlo', 'Monaco', monospace; font-size: 0.875rem; overflow-x: auto; }
+        blockquote { background: hsl(var(--muted)); border-left: 4px solid hsl(var(--primary)); padding: 1.5rem; margin: 1.5rem 0; font-size: 1.1rem; font-style: italic; color: hsl(var(--card-foreground)); border-radius: 0 var(--radius) var(--radius) 0; }
+        .tag { background: hsl(var(--primary), 0.1); color: hsl(var(--primary)); padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.8rem; font-weight: 500; }
+
+        /* Layouts */
+        .two-column { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+        .slide-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            justify-content: center; /* Vertically center the content block */
+        }
+        .scrollable-content { flex: 1; overflow-y: auto; padding-right: 1rem; }
+        .scrollable-content::-webkit-scrollbar { width: 6px; }
+        .scrollable-content::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 3px; }
+        .center-content { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; text-align: center; }
+
+        /* Fullscreen Button */
+        .fullscreen-btn { position: fixed; top: 1rem; right: 1rem; z-index: 1000; }
+
+        /* Slide Logo */
+        .slide-logo {
+            position: absolute;
+            top: -2rem;
+            right: 1rem;
+            z-index: 0;
+            height: 28px;
+            opacity: 0.9;
+        }
+        @media (min-width: 768px) {
+            .slide-logo { height: 150px; }
+        }
+
+        /* Indicators */
+        .indicators { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 0.5rem; z-index: 100; }
+        .indicator { width: 8px; height: 8px; border-radius: 50%; background: hsl(var(--border)); cursor: pointer; transition: all 0.3s; border: none; }
+        .indicator.active { background: hsl(var(--primary)); transform: scale(1.5); }
+
+        /* --- IMPROVED DIAGRAMS --- */
+        
+        /* User Flow Diagram (Slide 4) */
+        .flow-diagram-v2 {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            gap: 1rem;
+            margin: 2rem 0;
+            width: 100%;
+        }
+        .flow-stage {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            flex: 1;
+        }
+        .flow-stage h4 {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            color: hsl(var(--muted-foreground));
+            font-weight: 500;
+        }
+        .flow-box {
+            background: hsl(var(--card));
+            border: 1px solid hsl(var(--border));
+            border-radius: var(--radius);
+            padding: 1rem;
+            min-width: 180px;
+            box-shadow: var(--shadow-sm);
+        }
+        .flow-box .icon { font-size: 1.5rem; margin-bottom: 0.5rem; color: hsl(var(--primary)); }
+        .flow-box p { font-size: 0.9rem; font-weight: 600; color: hsl(var(--card-foreground)); margin: 0; line-height: 1.4; }
+        .flow-arrow-v2 {
+            flex-shrink: 0;
+            color: hsl(var(--primary));
+        }
+
+        /* Architecture Diagram (Slide 7) */
+        .arch-diagram {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            background: hsl(var(--muted));
+            padding: 2rem;
+            border-radius: var(--radius);
+            margin: 1rem 0;
+        }
+        .arch-layer {
+            background: hsla(var(--card), 0.7);
+            border: 1px solid hsl(var(--border));
+            border-radius: var(--radius);
+            padding: 1.25rem;
+            text-align: center;
+            position: relative;
+        }
+        .arch-layer h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: hsl(var(--foreground));
+            margin-bottom: 1rem;
+        }
+        .arch-components {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .arch-component {
+            background: hsl(var(--card));
+            padding: 0.75rem 1rem;
+            border-radius: calc(var(--radius) * 0.75);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid transparent;
+            min-width: 120px;
+        }
+        .arch-component .icon { font-size: 1.2rem; color: hsl(var(--secondary)); margin-bottom: 0.25rem; }
+        .arch-component strong { font-size: 0.9rem; display: block; }
+        .arch-component span { font-size: 0.75rem; color: hsl(var(--muted-foreground)); }
+        
+        .arch-arrow {
+            color: hsl(var(--secondary));
+            font-size: 2rem;
+            text-align: center;
+            margin: -0.75rem 0;
+        }
+
+        /* Slide 3 Specific Adjustments for content overflow */
+        #slide-3 .two-column {
+            gap: 1rem;
+        }
+        #slide-3 .card {
+            padding: 1.1rem;
+        }
+        #slide-3 .card p {
+            margin-bottom: 0;
+            line-height: 1.6;
+        }
+        #slide-3 h3 {
+             margin-bottom: 0.75rem;
+        }
+        #slide-3 table {
+            margin: 0.75rem 0 0 0;
+        }
+        #slide-3 th, #slide-3 td {
+            padding: 0.5rem 1rem;
+        }
+
+        /* NEW: Slide 2 Problem Visualization */
+        .problem-visual {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: stretch;
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        .problem-card {
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            border: 1px solid hsl(var(--border));
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .problem-card .icon-wrapper {
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+        .problem-card h4 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        .problem-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+        .problem-tag {
+            padding: 0.3rem 0.8rem;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        .value-creation { background: hsla(var(--primary), 0.05); }
+        .value-creation .icon-wrapper { color: hsl(var(--primary)); }
+        .value-creation .problem-tag { background: hsl(var(--card)); color: hsl(var(--primary)); border: 1px solid hsla(var(--primary), 0.3); }
+        
+        .admin-burden { background: hsl(var(--muted)); }
+        .admin-burden .icon-wrapper { color: hsl(var(--muted-foreground)); }
+        .admin-burden .problem-tag { background: hsl(var(--card)); color: hsl(var(--muted-foreground)); border: 1px solid hsl(var(--border)); }
+
+        .problem-arrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: hsl(var(--destructive));
+            opacity: 0.7;
+        }
+
+        /* NEW: Slide 4 Workflow Visualization */
+        .workflow-visual {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr auto 1fr;
+            align-items: stretch;
+            gap: 1rem;
+            width: 100%;
+            margin-top: 2rem;
+        }
+        .workflow-card {
+            padding: 1.5rem 1rem;
+            border-radius: var(--radius);
+            border: 1px solid hsl(var(--border));
+            text-align: center;
+            background: hsl(var(--muted));
+        }
+        .workflow-card .icon-wrapper {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 1.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: hsl(var(--card));
+            color: hsl(var(--primary));
+            box-shadow: var(--shadow-sm);
+            border: 1px solid hsl(var(--border));
+        }
+        .workflow-card h4 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: hsl(var(--foreground));
+        }
+        .workflow-card ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .workflow-card li {
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 0.25rem;
+            color: hsl(var(--muted-foreground));
+        }
+        .workflow-arrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: hsl(var(--primary));
+            opacity: 0.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+    <div class="presentation-wrapper">
+        <div class="presentation-container">
+            <img id="slideLogo" class="slide-logo" src="https://www.dropbox.com/scl/fi/772t32etl5yebzzuiwre6/NEXT_logo.png?rlkey=fohapk9c4o3ee17un5zsfuhz9&st=qpctlb5z&dl=1" alt="NEXT.RUNNERS logo" />
+            <!-- Slide 1: Cover -->
+            <div class="slide slide-cover active">
+                <div class="animated-item"><h1>Weave</h1></div>
+                <div class="animated-item"><p class="subtitle">나를 위한 단 하나의 업무 플랫폼</p></div>
+                <div class="animated-item"><p class="description">프로젝트 관리부터 세무 신고까지 솔로프리너를 위한 완벽한 솔루션입니다.</p></div>
+                <div class="animated-item"><div class="team"><p><strong>Team Jane</strong>: 박현일 • 조용현</p></div></div>
+            </div>
+
+            <!-- Slide 2: 서비스 기획 배경 -->
+            <div class="slide">
+                <h2>🎯 왜 Weave인가? <span style="font-weight: 400; color: hsl(var(--muted-foreground));">| 시장과 문제 정의</span></h2>
+                <div class="slide-content">
+                    <div class="animated-item">
+                        <h3>📈 폭발적으로 성장하는 1인 기업 시장</h3>
+                        <p>디지털 전환이 가속화되면서, 국내 프리랜서 시장은 <strong>687만 명</strong>을 돌파했습니다. 하지만 이들의 성장을 지원하는 인프라는 여전히 부족합니다.</p>
+                    </div>
+                    <div class="problem-visual animated-item">
+                        <div class="problem-card value-creation">
+                            <div>
+                                <div class="icon-wrapper">
+                                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 18.514V19.5C9 20.8807 10.1193 22 11.5 22H12.5C13.8807 22 15 20.8807 15 19.5V18.514M12 2C8.68629 2 6 4.68629 6 8C6 10.2311 7.23371 12.1502 9 13.214V16.5C9 17.3284 9.67157 18 10.5 18H13.5C14.3284 18 15 17.3284 15 16.5V13.214C16.7663 12.1502 18 10.2311 18 8C18 4.68629 15.3137 2 12 2Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                                </div>
+                                <h4>집중하고 싶은 '본업'</h4>
+                            </div>
+                            <div class="problem-tags">
+                                <span class="problem-tag">기획</span>
+                                <span class="problem-tag">디자인</span>
+                                <span class="problem-tag">개발</span>
+                                <span class="problem-tag">마케팅</span>
+                            </div>
+                        </div>
+                        <div class="problem-arrow">
+                             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 6V18M12 6H15.5C16.8807 6 18 7.11929 18 8.5C18 9.88071 16.8807 11 15.5 11H8.5C7.11929 11 6 9.88071 6 8.5C6 7.11929 7.11929 6 8.5 6H12Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><rect x="2" y="18" width="20" height="4" rx="1" stroke="currentColor" stroke-width="1.5"></rect></svg>
+                        </div>
+                        <div class="problem-card admin-burden">
+                            <div>
+                                <div class="icon-wrapper">
+                                     <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8.75269 9.34412C5.9376 7.92332 3.01825 9.87888 3.51139 13.0163C4.01798 16.2272 7.72913 17.151 10.3392 16.6264C12.7618 16.1384 14.5777 14.5242 15.1951 12.1812C15.8078 9.85736 14.2818 7.74722 12.1583 6.83443C10.0519 5.92881 7.42083 6.42578 5.99812 8.01255" stroke="currentColor" stroke-width="1.5"></path><path d="M15.2471 8.34412C18.0622 9.76492 20.9815 7.80936 20.4884 4.67185C19.9818 1.46098 16.2707 0.537231 13.6606 1.06184C11.238 1.54987 9.42213 3.16403 8.80471 5.50702C8.19201 7.83088 9.71803 9.94101 11.8415 10.8538C13.9479 11.7594 16.579 11.2624 18.0017 9.67568" stroke="currentColor" stroke-width="1.5"></path><path d="M15 15.25C15 18.019 17.231 20.25 20 20.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path><path d="M4 20C6.769 20 9 17.769 9 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg>
+                                </div>
+                                <h4>발목을 잡는 '관리 업무'</h4>
+                            </div>
+                            <div class="problem-tags">
+                                <span class="problem-tag">세금 신고</span>
+                                <span class="problem-tag">비용 처리</span>
+                                <span class="problem-tag">계약서 관리</span>
+                                <span class="problem-tag">정산</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="animated-item card" style="text-align: center; background: linear-gradient(135deg, hsla(var(--primary), 0.1), hsla(var(--secondary), 0.1)); border-color: hsla(var(--primary), 0.3);">
+                        <h4 style="font-size: 1.25rem;">Weave의 핵심 가치: 분리된 업무를 하나로 엮다</h4>
+                        <p style="font-size: 1.5rem; font-weight: 600; color: hsl(var(--foreground)); margin: 0;">
+                            업무 관리 (ERP) <span style="color: hsl(var(--primary)); font-weight: 700;">+</span> 세무 자동화
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 3: 문제상황 분석 -->
+            <div class="slide" id="slide-3">
+                <h2>🔍 프리랜서가 겪는 3대 Pain Point</h2>
+                <div class="slide-content two-column">
+                    <div class="card animated-item">
+                        <h3>1. 데이터 파편화의 악순환 🔄</h3>
+                        <p>노션, 엑셀, 카톡에 흩어진 데이터. 연말정산 시 <strong>평균 3일 이상</strong>을 데이터 취합에 소요하며, 누락으로 인한 <strong>절세 기회를 상실</strong>합니다.</p>
+                    </div>
+                    <div class="card animated-item">
+                        <h3>2. 세무 불확실성의 공포 ⚠️</h3>
+                        <p><strong>42%</strong>가 가산세를 경험하고, <strong>78%</strong>가 세법 이해 부족을 호소합니다. 잘못된 신고는 곧 <strong>법적 리스크</strong>로 이어집니다.</p>
+                    </div>
+                    <div class="card animated-item" style="grid-column: 1 / -1;">
+                        <h3>3. 업무 증빙 및 관리 부재 📄</h3>
+                        <p>프로젝트 종료 후 계약서, 청구서 등 핵심 문서 관리가 체계적으로 이루어지지 않아, 계약 분쟁 발생 시 <strong>결정적인 증빙 자료가 부족</strong>합니다.</p>
+                    </div>
+                    <div class="animated-item" style="grid-column: 1 / -1;">
+                        <h3>기존 솔루션의 명확한 한계</h3>
+                        <table>
+                            <thead><tr><th>구분</th><th>삼쩜삼</th><th>더존</th><th class="highlight">Weave</th></tr></thead>
+                            <tbody>
+                                <tr><td>세무 편의성</td><td>높음</td><td>낮음</td><td style="font-weight: 600;">매우 높음</td></tr>
+                                <tr><td>업무 관리</td><td>없음</td><td>높음</td><td style="font-weight: 600;">높음</td></tr>
+                                <tr><td><strong>통합성 (핵심)</strong></td><td style="color: hsl(var(--destructive));"><strong>없음</strong></td><td style="color: hsl(var(--destructive));"><strong>없음</strong></td><td style="color: hsl(var(--primary)); font-weight: 700;"><strong>All-in-One</strong></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 4: 사용자 이용 플로우 -->
+            <div class="slide">
+                <h2>🚀 Weave와 함께하는 스마트한 워크플로우</h2>
+                <div class="slide-content center-content">
+                    <h2 class="animated-item" style="max-width: 80%; margin-bottom: 2rem; color: hsl(var(--primary))">Weave는 프로젝트 관리부터 세금 신고까지</h2>
+                    <h3 class="animated-item" style="max-width: 80%; margin-bottom: 2rem;">모든 비즈니스 과정을 하나의 흐름으로 통합하여 생산성을 극대화합니다.</h3>
+                    
+                    <!-- Improved Workflow Diagram -->
+                    <div class="workflow-visual animated-item">
+                        <!-- Stage 1 -->
+                        <div class="workflow-card">
+                            <div class="icon-wrapper">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 4.5V19.5M8.5 4.5H19.5V11.5H8.5V4.5Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M4.5 4.5H6.5V19.5H4.5V4.5Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                            </div>
+                            <h4>Stage 1: 업무 관리</h4>
+                            <ul>
+                                <li>체계적인 프로젝트 생성</li>
+                                <li>간편한 청구서 발송</li>
+                                <li>계약서 버전 관리</li>
+                            </ul>
+                        </div>
+                        <!-- Arrow -->
+                        <div class="workflow-arrow">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 12H20M20 12L14 6M20 12L14 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                        </div>
+                        <!-- Stage 2 -->
+                        <div class="workflow-card">
+                            <div class="icon-wrapper">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 21V17M12 7V3M21 12H17M7 12H3M18.364 18.364L15.5355 15.5355M8.46447 8.46447L5.63604 5.63604M18.364 5.63604L15.5355 8.46447M8.46447 15.5355L5.63604 18.364" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" stroke="currentColor" stroke-width="1.5"></path></svg>
+                            </div>
+                            <h4>Stage 2: 자동화</h4>
+                            <ul>
+                                <li>수익/비용 자동 분류</li>
+                                <li>계약서 등 복잡한 문서 생성</li>
+                                <li>실시간 수익성 분석</li>
+                            </ul>
+                        </div>
+                        <!-- Arrow -->
+                        <div class="workflow-arrow">
+                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 12H20M20 12L14 6M20 12L14 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                        </div>
+                        <!-- Stage 3 -->
+                        <div class="workflow-card">
+                            <div class="icon-wrapper">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 13.75C9.5 14.1642 9.16421 14.5 8.75 14.5C8.33579 14.5 8 14.1642 8 13.75C8 13.3358 8.33579 13 8.75 13C9.16421 13 9.5 13.3358 9.5 13.75Z" stroke="currentColor" stroke-width="1.5"></path><path d="M16 13.75C16 14.1642 15.6642 14.5 15.25 14.5C14.8358 14.5 14.5 14.1642 14.5 13.75C14.5 13.3358 14.8358 13 15.25 13C15.6642 13 16 13.3358 16 13.75Z" stroke="currentColor" stroke-width="1.5"></path><path d="M8.1713 18C9.42392 19.1413 11.0267 19.5 12.25 19.5C14.15 19.5 15.5 18.5 15.5 18C15.5 17.5 15.5 17.5 15.5 17.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path><path d="M2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C22 4.92893 22 7.28595 22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12Z" stroke="currentColor" stroke-width="1.5"></path><path d="M16.5 8L18 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path><path d="M6 8L7.5 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg>
+                            </div>
+                            <h4>Stage 3: 세무 신고</h4>
+                            <ul>
+                                <li>자동 세금 계산</li>
+                                <li>연말정산 자료 생성</li>
+                                <li>원클릭 대리 신고</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 5: 서비스 시연 -->
+            <div class="slide">
+                 <h2>🖥️ Live Demo & Core Features</h2>
+                <div class="slide-content">
+                    <div class="card animated-item" style="text-align: center; margin-bottom: 2rem;">
+                        <h3>지금 바로 경험해보세요!</h3>
+                        <p style="font-size: 1.5rem; margin:0.5rem 0;">
+                            🔗 <a href="https://weave-v3.vercel.app" target="_blank" style="font-weight: 600;">https://weave-v3.vercel.app</a>
+                        </p>
+                    </div>
+                    <div class="two-column">
+                        <div class="card animated-item">
+                            <h3>📊 통합 대시보드</h3>
+                            <p>실시간 수익 현황, 프로젝트 진행률, 월별 정산 내역 등 핵심 지표를 한눈에 파악할 수 있습니다.</p>
+                        </div>
+                        <div class="card animated-item">
+                            <h3>📁 스마트 프로젝트 관리</h3>
+                            <p>Advanced Table과 드래그앤드롭 인터페이스로 수많은 프로젝트를 직관적으로 관리하고 추적합니다.</p>
+                        </div>
+                        <div class="card animated-item">
+                            <h3>✨ 자동화 & 연동</h3>
+                            <p>한번의 연동으로 수익과 비용 데이터가 자동으로 취합되고, 세무 자료로 변환됩니다.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 6: 팀원별 역할 -->
+            <div class="slide">
+                <h2>👥 Team Jane: 역할과 가치</h2>
+                <div class="slide-content two-column">
+                    <div class="card animated-item">
+                        <h4 style="display: flex; align-items: center;">
+                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5.52 19c.64-2.2 1.84-3 3.22-3h6.52c1.38 0 2.58.8 3.22 3"/><circle cx="12" cy="10" r="3"/><circle cx="12" cy="12" r="10"/></svg>
+                            박현일 (Planning & Development & Design)
+                        </h4>
+                        <p>사용자 경험의 첫인상을 결정하는 홈페이지와 실시간 데이터 시각화가 핵심인 대시보드 개발을 주도하여 Weave의 가치를 효과적으로 전달했습니다.</p>
+                        <div style="display: flex; gap: 0.5rem; margin-top: 1rem;"><span class="tag">Home</span><span class="tag">Dashboard</span><span class="tag">Supabase</span><span class="tag">Document</span></div>
+                    </div>
+                    <div class="card animated-item">
+                        <h4 style="display: flex; align-items: center;">
+                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19 7-7 3 3-7 7-3-3z"/><path d="m18 13-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="m2 2 7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
+                            조용현 (Planning & Development & Design)
+                        </h4>
+                        <p>shadcn/ui 기반의 견고한 디자인 시스템을 구축하고, 복잡한 데이터를 다루는 프로젝트 관리 페이지의 사용성을 극대화하여 직관적인 UI/UX를 완성했습니다.</p>
+                        <div style="display: flex; gap: 0.5rem; margin-top: 1rem;"><span class="tag">Projects</span><span class="tag">Shadcn/ui</span><span class="tag">Centralization</span><span class="tag">Deployment</span></div>
+                    </div>
+                    <div class="card animated-item" style="margin-top: 1.5rem; background: linear-gradient(135deg, hsla(var(--primary), 0.05), hsla(var(--secondary), 0.05));">
+                        <h3 style="display: flex; align-items: center; gap: 0.5rem;">🤝 시너지를 통한 가치 증폭</h3>
+                        <p style="margin-top: 1rem; margin-bottom: 0;">Weave는 기획부터 디자인, 개발, 배포까지 모든 과정을 두 명의 팀원이 함께 고민하고 실행한 결과물입니다. 아이디어를 빠르게 프로토타이핑하고, 중앙화된 디자인 시스템을 기반으로 일관된 사용자 경험을 구축하며 시너지를 극대화했습니다.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 7: 기술 아키텍처 -->
+            <div class="slide">
+                <h2>🏗️ System Architecture: 안정성과 확장 추구</h2>
+                <div class="slide-content">
+                    <!-- Improved Architecture Diagram -->
+                    <div class="arch-diagram animated-item">
+                        <!-- Frontend Layer -->
+                        <div class="arch-layer">
+                            <h3>Frontend (Next.js 15)</h3>
+                            <div class="arch-components">
+                                <div class="arch-component"><strong>Home</strong><span>랜딩/마케팅</span></div>
+                                <div class="arch-component"><strong>Dashboard</strong><span>데이터 시각화</span></div>
+                                <div class="arch-component"><strong>Projects</strong><span>핵심 업무 관리</span></div>
+                            </div>
+                        </div>
+                        <div class="arch-arrow">↓</div>
+                        <!-- Backend Layer -->
+                        <div class="arch-layer">
+                            <h3>Backend as a Service (Supabase)</h3>
+                            <div class="arch-components">
+                                <div class="arch-component"><strong>Authentication</strong><span>사용자 인증</span></div>
+                                <div class="arch-component"><strong>PostgreSQL DB</strong><span>데이터 저장/관리</span></div>
+                                <div class="arch-component"><strong>Storage</strong><span>파일/문서 저장</span></div>
+                            </div>
+                        </div>
+                        <div class="arch-arrow">↓</div>
+                        <!-- External Layer -->
+                        <div class="arch-layer">
+                            <h3>External Services & API</h3>
+                            <div class="arch-components">
+                                <div class="arch-component"><strong>국세청 API</strong><span>세무 데이터 연동</span></div>
+                                <div class="arch-component"><strong>세무사 시스템</strong><span>대리 신고 연계</span></div>
+                                <div class="arch-component"><strong>서류 작성</strong><span>문서 자동 생성</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 8: 어려웠던 점 -->
+            <div class="slide">
+                <h2>💪 도전과 극복: 병합 과정의 빌드 에러 해결기</h2>
+                <div class="slide-content two-column">
+                    <div class="card animated-item">
+                        <h3>🔥 문제 상황</h3>
+                        <p>개별적으로 개발한 컴포넌트와 페이지를 병합하는 과정에서 타입 충돌, 경로 설정 오류, 라이브러리 버전 비호환성 등 복합적인 빌드 에러가 발생했습니다.</p>
+                    </div>
+                    <div class="card animated-item">
+                        <h3>💡 해결 과정</h3>
+                        <p>단순 코드 비교를 넘어, <strong>tsconfig</strong> 경로 설정을 UI를 표준화하고, <strong>타입 정의(Type Definition)를 중앙에서 관리</strong>하며, 단계별로 기능을 통합하는 체계적인 접근으로 문제를 해결했습니다.</p>
+                    </div>
+                    <div class="card animated-item" style="grid-column: 1 / -1;">
+                        <h3>✅ 얻은 교훈: 성장의 자양분</h3>
+                        <p>이 경험을 통해 <strong>초기 프로젝트 설정의 중요성</strong>과 <strong>지속적인 통합(CI)의 필요성</strong>을 체감했습니다. 또한, 견고한 타입 시스템과 명확한 팀 커뮤니케이션이 프로젝트 안정성의 핵심임을 깨닫는 계기가 되었습니다.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 9: 멘토링 받았던 사항 -->
+            <div class="slide">
+                <h2>🎓 멘토링을 통한 성장과정</h2>
+                <div class="slide-content">
+                    <div class="two-column" style="grid-template-columns: repeat(3, 1fr); align-items: stretch; gap: 1.5rem;">
+                        <!-- Mentor Card -->
+                        <div class="card animated-item">
+                            <h3 style="display: flex; align-items: center; gap: 0.5rem;">👨‍🏫 멘토님</h3>
+                            <p style="margin-top: 1rem; margin-bottom: 1.5rem;">실사용자 관점에서 UI/UX 개선 방향을 제시하고, 프로젝트의 전반적인 방향 설정을 도와주셨습니다.</p>
+                            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                                <span class="tag">실유저 평가</span>
+                                <span class="tag">UI 개선 자문</span>
+                                <span class="tag">방향성 설정</span>
+                            </div>
+                        </div>
+                        <!-- Instructor Card -->
+                        <div class="card animated-item">
+                            <h3 style="display: flex; align-items: center; gap: 0.5rem;">👨‍💻 강사님</h3>
+                            <p style="margin-top: 1rem; margin-bottom: 1.5rem;">기술적 난관에 부딪혔을 때, 코드 리뷰와 전문적인 자문을 통해 문제 해결을 도와주셨습니다.</p>
+                            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                                <span class="tag">코드 리뷰</span>
+                                <span class="tag">기술 진행 자문</span>
+                            </div>
+                        </div>
+                        <!-- Staff Card -->
+                        <div class="card animated-item" style="background: linear-gradient(135deg, hsla(var(--primary), 0.1), hsla(var(--secondary), 0.1)); border-color: hsla(var(--primary), 0.3); text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                            <h3 style="display: flex; align-items: center; gap: 0.5rem;">🎉 운영진</h3>
+                            <p style="font-size: 3rem; margin: 1.5rem 0;">❤️</p>
+                            <p style="font-weight: 600; color: hsl(var(--card-foreground)); margin:0;">최고의 피드백과 격려</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 10: Q&A -->
+            <div class="slide">
+                <div class="center-content">
+                    <h1 class="animated-item">🙋‍♂️ Q&A</h1>
+                    <p class="animated-item" style="font-size: 1.25rem; margin-top: -1rem; margin-bottom: 2rem;">경쳥해주셔서 감사합니다. 궁금한 점을 질문해주세요.</p>
+                    
+                    <div style="width: 100%; max-width: 800px;">
+                        <div class="card animated-item" style="margin-bottom: 1rem; text-align: left;">
+                            <h4><strong>Q.</strong> 향후 개발 계획과 비전은 무엇인가요?</h4>
+                            <p><strong>A.</strong> 단기적으로는 은행 API 연동을 통한 금융 데이터 자동화를, 장기적으로는 AI 기반의 개인 맞춤형 절세 컨설팅 기능을 도입하여 '프리랜서들의 비즈니스 파트너'로 성장하는 것이 목표입니다.</p>
+                        </div>
+                        <div class="card animated-item" style="margin-bottom: 2rem; text-align: left;">
+                            <h4><strong>Q.</strong> 핵심 경쟁력과 차별점은 무엇인가요?</h4>
+                            <p><strong>A.</strong> 분절된 기능을 제공하는 경쟁사와 달리, Weave는 <strong>'업무 관리와 세무의 완벽한 통합'</strong>이라는 독보적인 가치를 제공합니다. 전문 세무법인과의 업무협약을 완료했습니다.</p>
+                        </div>
+                    </div>
+
+                    <div class="slide-cover active">
+                        <div class="animated-item"><h1>Weave</h1></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-container">
+        <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">← 이전</button>
+        <span class="slide-counter" id="slideCounter">1 / 10</span>
+        <button class="nav-btn primary" id="nextBtn" onclick="changeSlide(1)">다음 →</button>
+    </div>
+    <div class="indicators" id="indicators"></div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        
+        function initIndicators() {
+            const container = document.getElementById('indicators');
+            for (let i = 0; i < totalSlides; i++) {
+                const dot = document.createElement('button');
+                dot.className = 'indicator';
+                if (i === 0) dot.classList.add('active');
+                dot.onclick = () => goToSlide(i);
+                container.appendChild(dot);
+            }
+        }
+        
+        function updateSlideDisplay() {
+            slides.forEach((slide, index) => {
+                slide.classList.remove('active');
+                if (index === currentSlide) {
+                    slide.classList.add('active');
+                }
+            });
+            
+            document.getElementById('slideCounter').textContent = `${currentSlide + 1} / ${totalSlides}`;
+            document.getElementById('progressFill').style.width = `${((currentSlide + 1) / totalSlides) * 100}%`;
+            document.getElementById('prevBtn').disabled = currentSlide === 0;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides - 1;
+            
+            const indicators = document.querySelectorAll('.indicator');
+            indicators.forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentSlide);
+            });
+
+            // Show logo on slides except 1 and 10 (index 0 and 9)
+            const logoEl = document.getElementById('slideLogo');
+            if (logoEl) {
+                const isHiddenSlide = currentSlide === 0 || currentSlide === totalSlides - 1;
+                logoEl.style.display = isHiddenSlide ? 'none' : 'block';
+            }
+        }
+        
+        function changeSlide(direction) {
+            const newSlide = currentSlide + direction;
+            if (newSlide >= 0 && newSlide < totalSlides) {
+                currentSlide = newSlide;
+                updateSlideDisplay();
+            }
+        }
+        
+        function goToSlide(slideNumber) {
+            if (slideNumber >= 0 && slideNumber < totalSlides) {
+                currentSlide = slideNumber;
+                updateSlideDisplay();
+            }
+        }
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') changeSlide(1);
+            if (e.key === 'ArrowLeft') changeSlide(-1);
+        });
+        
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+            else if (document.exitFullscreen) document.exitFullscreen();
+        }
+        
+        let touchStartX = 0;
+        document.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; });
+        document.addEventListener('touchend', (e) => {
+            const touchEndX = e.changedTouches[0].screenX;
+            if (touchStartX - touchEndX > 50) changeSlide(1);
+            if (touchEndX - touchStartX > 50) changeSlide(-1);
+        });
+        
+        initIndicators();
+        updateSlideDisplay();
+    </script>
+</body>
+</html>

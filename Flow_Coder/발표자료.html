@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vibe Coding Community Platform - 발표 자료</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            --slide-bg: #f8fafc;
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --accent-color: #3b82f6;
+            --border-color: #e2e8f0;
+        }
+        .dark body {
+            --slide-bg: #0f172a;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --accent-color: #60a5fa;
+            --border-color: #334155;
+        }
+        .slide-container {
+            aspect-ratio: 16 / 9;
+        }
+        .slide {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        .slide.active {
+            display: flex;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .slide-title { color: var(--accent-color); }
+        .slide-content h3 { color: var(--text-primary); }
+        .slide-content p, .slide-content li { color: var(--text-secondary); }
+        .chip {
+            background-color: var(--accent-color);
+            color: white;
+        }
+        .progress-bar {
+            background-color: var(--border-color);
+        }
+        .progress-bar-fill {
+            background-color: var(--accent-color);
+            transition: width 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 dark:bg-slate-900 flex flex-col items-center justify-center min-h-screen p-4 transition-colors duration-300">
+
+    <div class="w-full max-w-6xl">
+        <!-- Presentation Title -->
+        <header class="text-center mb-4">
+            <h1 class="text-2xl font-bold text-slate-800 dark:text-slate-200">Vibe Coding Community Platform</h1>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Project Presentation</p>
+        </header>
+
+        <!-- Slide Navigation -->
+        <div class="flex items-center justify-center space-x-4">
+            <button id="prev-btn" class="p-3 rounded-full bg-white dark:bg-slate-800 shadow-md hover:bg-slate-200 dark:hover:bg-slate-700 transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-slate-900">
+                <i data-lucide="arrow-left" class="text-slate-600 dark:text-slate-300"></i>
+            </button>
+
+            <!-- Slide Container -->
+            <div id="presentation-container" class="slide-container w-full bg-[var(--slide-bg)] rounded-lg shadow-2xl overflow-hidden relative border border-[var(--border-color)]">
+                
+                <!-- Slides will be injected here by JS -->
+                <!-- Slide 1: Title -->
+                <div class="slide active h-full flex-col justify-center items-center text-center" data-title="시작">
+                    <img src="FlowCoder(투명).png" alt="바이브코딩 로고" class="w-20 h-20 mb-6">
+                    <h1 class="text-6xl font-black text-[var(--text-primary)]">Vibe Coding 커뮤니티</h1>
+                    <p class="text-3xl pt-4 font-light text-[var(--text-secondary)] mt-2">바이브코더를 위한 새로운 소통의 공간</p>
+                    <div class="mt-12 border-t border-[var(--border-color)] w-1/2 pt-6">
+                        <p class="text-lg text-[var(--text-primary)] font-semibold">Team FlowCoder</p>
+                        <p class="text-md text-[var(--text-secondary)] mt-1">박현일, 조용현, 김호천</p>
+                    </div>
+                </div>
+
+                <!-- Slide 2: 기획 배경 -->
+                <div class="slide flex-col p-12 lg:p-16" data-title="기획 배경">
+                    <h2 class="slide-title text-2xl font-bold mb-8">01. 서비스 기획 배경</h2>
+                    <div class="slide-content grid grid-cols-1 md:grid-cols-2 gap-8 text-lg flex-grow pt-10">
+                        <div class="bg-slate-100 dark:bg-slate-800/50 p-6 rounded-lg">
+                            <h3 class="font-bold text-xl mb-3 flex items-center"><i data-lucide="telescope" class="mr-3 text-blue-500"></i>프로젝트를 시작한 이유</h3>
+                            <p>캠프 내에서 정규 과정 이외에도 바이브코딩에 대한 궁금증이 많은 것 같았고, 바이브코딩에 대한 궁금증을 해소하고, 개발자들이 지식과 경험을 자유롭게 공유하는 활발한 커뮤니티 플랫폼을 구축하고자 하였습니다.</p>
+                        </div>
+                        <div class="bg-slate-100 dark:bg-slate-800/50 p-6 rounded-lg">
+                            <h3 class="font-bold text-xl mb-3 flex items-center"><i data-lucide="target" class="mr-3 text-blue-500"></i>핵심 목표</h3>
+                            <ul class="list-disc list-inside space-y-2">
+                                <li>바이브코딩에 대한 궁금증을 해소</li>
+                                <li>사용자 간 지식 공유 및 협업 활성화</li>
+                                <li>Q&A를 통한 신속한 문제 해결 지원</li>
+                                <li>바이브코딩 생태계의 최신 정보 전달</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Slide 3: 문제 상황 분석 -->
+                <div class="slide flex-col p-12 lg:p-16" data-title="문제 상황">
+                    <h2 class="slide-title text-2xl font-bold mb-8">02. 문제 상황 분석</h2>
+                    <div class="slide-content grid grid-cols-1 md:grid-cols-3 gap-6 text-center flex-grow pt-10">
+                        <div class="border border-[var(--border-color)] p-6 rounded-lg flex flex-col items-center justify-center">
+                            <i data-lucide="cloud-off" class="w-12 h-12 text-red-500 mb-4"></i>
+                            <h3 class="font-bold text-xl mb-2">정보의 파편화</h3>
+                            <p class="text-md">지식과 질문들이 여러 채널에 흩어져 있어 정보 접근성이 낮고 검색이 어려움</p>
+                        </div>
+                        <div class="border border-[var(--border-color)] p-6 rounded-lg flex flex-col items-center justify-center">
+                            <i data-lucide="users-round" class="w-12 h-12 text-yellow-500 mb-4"></i>
+                            <h3 class="font-bold text-xl mb-2">소통의 부재</h3>
+                            <p class="text-md">캠프원 간의 교류와 협업을 위한 공식적인 소통 창구가 부족하여 커뮤니티 활성화에 한계</p>
+                        </div>
+                        <div class="border border-[var(--border-color)] p-6 rounded-lg flex flex-col items-center justify-center">
+                           <i data-lucide="search-slash" class="w-12 h-12 text-blue-500 mb-4"></i>
+                            <h3 class="font-bold text-xl mb-2">전문 커뮤니티 부족</h3>
+                            <p class="text-md">한글로된 바이브코딩에 대한 전문 커뮤니티가 부족하여 정보 접근성이 낮고 검색이 어려움</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 4: 사용자 이용 흐름 -->
+                <div class="slide flex-col p-12 lg:p-16" data-title="사용자 흐름">
+                    <h2 class="slide-title text-2xl font-bold mb-8">03. 사용자 이용 흐름</h2>
+                    <div class="slide-content flex-grow flex flex-col items-center justify-center w-full space-y-2">
+                        <img src="주요 기능별 사용자 흐름.png" alt="사용자 이용 흐름" class="w-full h-full object-contain">
+                    </div>
+                </div>
+
+                <!-- Slide 5: 서비스 시연 -->
+                <div class="slide flex-col p-12 lg:p-16" data-title="서비스 시연">
+                    <h2 class="slide-title text-2xl font-bold mb-8">04. 서비스 시연</h2>
+                    <div class="slide-content w-full h-full flex items-center justify-center bg-slate-200 dark:bg-slate-800 rounded-md">
+                        <p class="text-3xl font-bold text-[var(--text-secondary)]">Live Demo</p>
+                    </div>
+                    <div class="flex items-center justify-center pt-10">
+                        <a href="http://localhost:3000/" target="_blank"><img src="FlowCoder(투명).png" alt="바이브코딩 로고" class="w-60 h-60"></a>
+                    </div>
+                </div>
+
+                <!-- Slide 6: 팀원 별 역할 -->
+                <div class="slide flex-col p-12 lg:p-16" data-title="팀원 역할">
+                    <h2 class="slide-title text-2xl font-bold mb-8">05. 팀원 별 역할</h2>
+                    <div class="slide-content flex-grow flex items-center justify-center w-full pt-10">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-4xl text-center">
+                            <div class="p-6 border border-[var(--border-color)] rounded-lg">
+                                <img src="https://placehold.co/100x100/E2E8F0/475569?text=PH" class="w-24 h-24 rounded-full mx-auto mb-4" alt="박현일">
+                                <h3 class="font-bold text-xl">박현일 (팀장)</h3>
+                                <p class="text-blue-500 font-semibold mt-1">커뮤니티 페이지 개발</p>
+                                <p class="text-sm mt-2">Next.js 마이그레이션, 게시글 CRUD, 인증 시스템 구현</p>
+                            </div>
+                            <div class="p-6 border border-[var(--border-color)] rounded-lg">
+                                <img src="https://placehold.co/100x100/E2E8F0/475569?text=JY" class="w-24 h-24 rounded-full mx-auto mb-4" alt="조용현">
+                                <h3 class="font-bold text-xl">조용현 (팀원)</h3>
+                                <p class="text-blue-500 font-semibold mt-1">UI 디자인, 규칙 설정</p>
+                                <p class="text-sm mt-2">Shadcn/ui 기반 디자인 시스템, 반응형 레이아웃, 커뮤니티 가이드라인</p>
+                            </div>
+                            <div class="p-6 border border-[var(--border-color)] rounded-lg">
+                                <img src="https://placehold.co/100x100/E2E8F0/475569?text=KH" class="w-24 h-24 rounded-full mx-auto mb-4" alt="김호천">
+                                <h3 class="font-bold text-xl">김호천 (팀원)</h3>
+                                <p class="text-blue-500 font-semibold mt-1">커뮤니티 운영</p>
+                                <p class="text-sm mt-2">콘텐츠 관리, 사용자 피드백 수집, 커뮤니티 이벤트 기획</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 7: 아키텍처 -->
+                <div class="slide flex-col p-12 lg:p-16" data-title="아키텍처">
+                    <h2 class="slide-title text-2xl font-bold mb-8">06. 아키텍처</h2>
+                    <div class="slide-content flex-grow grid grid-cols-1 md:grid-cols-3 gap-6 w-full pt-10">
+                        <!-- Frontend -->
+                        <div class="bg-slate-100 dark:bg-slate-800/50 p-6 rounded-lg">
+                            <h3 class="font-bold text-xl mb-4 text-center flex items-center justify-center"><i data-lucide="layout-template" class="mr-2 text-blue-500"></i>Frontend</h3>
+                            <ul class="space-y-2 text-sm">
+                                <li class="flex items-center"><span class="chip text-xs font-bold mr-3 px-2 py-1 rounded-full w-24 inline-flex justify-center">Framework</span> Next.js 14</li>
+                                <li class="flex items-center"><span class="chip text-xs font-bold mr-3 px-2 py-1 rounded-full w-24 inline-flex justify-center">Language</span> TypeScript</li>
+                                <li class="flex items-center"><span class="chip text-xs font-bold mr-3 px-2 py-1 rounded-full w-24 inline-flex justify-center">Styling</span> Tailwind CSS</li>
+                                <li class="flex items-center"><span class="chip text-xs font-bold mr-3 px-2 py-1 rounded-full w-24 inline-flex justify-center">UI Kit</span> shadcn/ui</li>
+                                <li class="flex items-center"><span class="chip text-xs font-bold mr-3 px-2 py-1 rounded-full w-24 inline-flex justify-center">State</span> React Query, Zustand</li>
+                            </ul>
+                        </div>
+                        <!-- Backend -->
+                        <div class="bg-slate-100 dark:bg-slate-800/50 p-6 rounded-lg">
+                            <h3 class="font-bold text-xl mb-4 text-center flex items-center justify-center"><i data-lucide="server" class="mr-2 text-blue-500"></i>Backend</h3>
+                            <ul class="space-y-2 text-sm">
+                                <li class="flex items-center"><span class="chip text-xs font-bold mr-3 px-2 py-1 rounded-full w-24 inline-flex justify-center">Runtime</span> Next.js API Routes</li>
+                                <li class="flex items-center"><span class="chip text-xs font-bold mr-3 px-2 py-1 rounded-full w-24 inline-flex justify-center">Database</span> PostgreSQL</li>
+                                <li class="flex items-center"><span class="chip text-xs font-bold mr-3 px-2 py-1 rounded-full w-24 inline-flex justify-center">Auth</span> NextAuth.js v5</li>
+                                <li class="flex items-center"><span class="chip text-xs font-bold mr-3 px-2 py-1 rounded-full w-24 inline-flex justify-center">Editor</span> Tiptap</li>
+                            </ul>
+                        </div>
+                        <!-- Infra -->
+                        <div class="bg-slate-100 dark:bg-slate-800/50 p-6 rounded-lg">
+                            <h3 class="font-bold text-xl mb-4 text-center flex items-center justify-center"><i data-lucide="globe" class="mr-2 text-blue-500"></i>Infrastructure</h3>
+                            <ul class="space-y-2 text-sm">
+                                <li class="flex items-center"><span class="chip text-xs font-bold mr-3 px-2 py-1 rounded-full w-24 inline-flex justify-center">Hosting</span> Vercel</li>
+                                <li class="flex items-center"><span class="chip text-xs font-bold mr-3 px-2 py-1 rounded-full w-24 inline-flex justify-center">DB Hosting</span> Supabase / Railway</li>
+                                <li class="flex items-center"><span class="chip text-xs font-bold mr-3 px-2 py-1 rounded-full w-24 inline-flex justify-center">Image</span> Cloudinary / S3</li>
+                                <li class="flex items-center"><span class="chip text-xs font-bold mr-3 px-2 py-1 rounded-full w-24 inline-flex justify-center">Search</span> PostgreSQL FTS</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Slide 8: 회고 -->
+                <div class="slide flex-col p-12 lg:p-16" data-title="회고">
+                    <h2 class="slide-title text-2xl font-bold mb-8">07. 회고 및 커뮤니티 구축 노력</h2>
+                    <div class="slide-content flex flex-col flex-grow justify-between">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-lg">
+                            <div>
+                                <h3 class="font-bold text-xl mb-3 flex items-center"><i data-lucide="swords" class="mr-3 text-red-500"></i>어려웠던 점</h3>
+                                <ul class="list-disc list-inside space-y-2">
+                                    <li><strong>스터디 모임 개설:</strong> 부트캠프 내 스터디를 개설하여 학습 문화를 조성했으나, 초기 단계라 아직 운영이 미숙합니다. 앞으로의 효율적인 운영 방향을 정하는 것이 과제로 남아있습니다.</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-xl mb-3 flex items-center"><i data-lucide="trending-up" class="mr-3 text-green-500"></i>발전시킬 내용</h3>
+                                 <ul class="list-disc list-inside space-y-2">
+                                    <li><strong>디스코드 및 노션 활성화:</strong> 개설된 디스코드 채널과 노션 페이지의 참여를 유도하고 유용한 콘텐츠를 지속적으로 확충하여 커뮤니티의 핵심 소통 창구로 발전시키겠습니다.</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="mt-8 pt-6 w-full border-t border-[var(--border-color)]">
+                            <div class="flex items-start justify-center space-x-16 text-center">
+                                <div class="flex flex-col items-center w-40">
+                                    <i data-lucide="book-open" class="w-12 h-12 text-blue-500 mb-2"></i>
+                                    <span class="font-semibold text-[var(--text-primary)] text-lg">스터디 모임</span>
+                                    <p class="text-sm text-[var(--text-secondary)] mt-1">학습 문화 조성</p>
+                                </div>
+                                <a href="https://discord.gg/JaGN6nN7" target="_blank" class="flex flex-col items-center w-40 hover:opacity-75 transition-opacity">
+                                    <i data-lucide="message-square" class="w-12 h-12 text-blue-500 mb-2"></i>
+                                    <span class="font-semibold text-[var(--text-primary)] text-lg">디스코드 채널</span>
+                                    <p class="text-sm text-[var(--text-secondary)] mt-1">실시간 소통</p>
+                                </a>
+                                <a href="https://holistic-stargazer-240.notion.site/FlowCoder-29221973974181b89359f2a56f8bf3d8?pvs=143" target="_blank" class="flex flex-col items-center w-40 hover:opacity-75 transition-opacity">
+                                    <i data-lucide="notebook-tabs" class="w-12 h-12 text-blue-500 mb-2"></i>
+                                    <span class="font-semibold text-[var(--text-primary)] text-lg">자료공유 노션</span>
+                                     <p class="text-sm text-[var(--text-secondary)] mt-1">지식 아카이빙</p>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 10: 멘토링 -->
+                <div class="slide flex-col p-12 lg:p-16" data-title="멘토링">
+                    <h2 class="slide-title text-2xl font-bold mb-8">08. 멘토링 반영 사항</h2>
+                    <div class="slide-content flex-grow w-full">
+                        <ul class="space-y-6 text-lg">
+                            <li class="flex items-start">
+                                <i data-lucide="check-circle-2" class="text-green-500 w-7 h-7 mr-4 mt-1 shrink-0"></i>
+                                <div>
+                                    <h3 class="font-bold">기술 스택 선정 피드백</h3>
+                                    <p class="text-base">SEO의 중요성을 고려하여 Vite 대신 Next.js를 채택하라는 조언을 적극 반영, 검색엔진 최적화 기반 마련</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start">
+                                <i data-lucide="check-circle-2" class="text-green-500 w-7 h-7 mr-4 mt-1 shrink-0"></i>
+                                <div>
+                                    <h3 class="font-bold">데이터베이스 스키마 설계</h3>
+                                    <p class="text-base">확장성을 고려한 테이블 구조 설계에 대한 멘토링을 통해 사용자, 게시글, 댓글 간의 관계를 효율적으로 정의</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start">
+                                <i data-lucide="check-circle-2" class="text-green-500 w-7 h-7 mr-4 mt-1 shrink-0"></i>
+                                <div>
+                                    <h3 class="font-bold">MVP(최소 기능 제품) 범위 설정</h3>
+                                    <p class="text-base">프로젝트 초기 단계에서는 핵심 기능(게시판, Q&A)에 집중하라는 조언에 따라 개발 우선순위를 명확히 설정</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Slide 11: Q&A -->
+                <div class="slide h-full flex-col justify-center items-center text-center p-12" data-title="Q&A">
+                    <h1 class="text-8xl font-black text-[var(--text-primary)]">Q & A</h1>
+                    <p class="text-3xl font-light text-[var(--text-secondary)] mt-4">질문과 답변</p>
+                    <div class="mt-20 border-t border-[var(--border-color)] w-1/3 pt-6">
+                        <p class="text-2xl text-[var(--text-primary)] font-semibold">감사합니다</p>
+                    </div>
+                </div>
+            </div>
+
+            <button id="next-btn" class="p-3 rounded-full bg-white dark:bg-slate-800 shadow-md hover:bg-slate-200 dark:hover:bg-slate-700 transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-slate-900">
+                <i data-lucide="arrow-right" class="text-slate-600 dark:text-slate-300"></i>
+            </button>
+        </div>
+        
+        <!-- Progress Bar and Footer -->
+        <footer class="mt-4 w-full max-w-6xl mx-auto">
+            <div class="flex justify-between items-center text-sm text-slate-500 dark:text-slate-400 mb-1 px-1">
+                <span id="slide-title-display"></span>
+                <span id="slide-counter"></span>
+            </div>
+            <div class="progress-bar w-full h-2 rounded-full overflow-hidden">
+                <div id="progress-bar-fill" class="progress-bar-fill h-full"></div>
+            </div>
+        </footer>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const slides = document.querySelectorAll('.slide');
+            const nextBtn = document.getElementById('next-btn');
+            const prevBtn = document.getElementById('prev-btn');
+            const slideCounter = document.getElementById('slide-counter');
+            const progressBarFill = document.getElementById('progress-bar-fill');
+            const slideTitleDisplay = document.getElementById('slide-title-display');
+
+            let currentSlide = 0;
+            const totalSlides = slides.length;
+
+            function showSlide(index) {
+                if (index >= totalSlides) {
+                    currentSlide = totalSlides - 1;
+                } else if (index < 0) {
+                    currentSlide = 0;
+                } else {
+                    currentSlide = index;
+                }
+
+                slides.forEach((slide, i) => {
+                    if (i === currentSlide) {
+                        slide.classList.add('active');
+                    } else {
+                        slide.classList.remove('active');
+                    }
+                });
+                updateUI();
+            }
+
+            function nextSlide() {
+                if (currentSlide < totalSlides - 1) {
+                    showSlide(currentSlide + 1);
+                }
+            }
+
+            function prevSlide() {
+                if (currentSlide > 0) {
+                    showSlide(currentSlide - 1);
+                }
+            }
+
+            function updateUI() {
+                slideCounter.textContent = `${currentSlide + 1} / ${totalSlides}`;
+                const progressPercentage = ((currentSlide + 1) / totalSlides) * 100;
+                progressBarFill.style.width = `${progressPercentage}%`;
+                slideTitleDisplay.textContent = slides[currentSlide].dataset.title || '';
+            }
+
+            // Event Listeners
+            nextBtn.addEventListener('click', nextSlide);
+            prevBtn.addEventListener('click', prevSlide);
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight' || e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    nextSlide();
+                } else if (e.key === 'ArrowLeft' || e.key === 'Backspace') {
+                    e.preventDefault();
+                    prevSlide();
+                }
+            });
+
+            // Initialize Lucide icons
+            lucide.createIcons();
+
+            // Initial setup
+            showSlide(0);
+        });
+    </script>
+</body>
+</html>

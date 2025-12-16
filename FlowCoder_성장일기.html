@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FlowCoder 성장일기</title>
+
+  <!-- 폰트 로드 (프리텐다드 사용) -->
+  <link rel="stylesheet" as="style" crossorigin
+    href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+
+  <style>
+    /* =========================================
+       1. 디자인 시스템 (Design System)
+       ========================================= */
+    :root {
+      /* 색상 (흑백 테마 유지) */
+      --color-primary: #191919;
+      /* 진한 검정 (텍스트, 포인트) */
+      --color-secondary: #ffffff;
+      /* 흰색 (배경, 반전 텍스트) */
+      --color-accent: #333333;
+      /* 강조용 짙은 회색 */
+      --color-gray-100: #f2f4f6;
+      /* 연한 회색 배경 */
+      --color-gray-200: #e5e8eb;
+      /* 테두리 */
+      --color-gray-500: #8b95a1;
+      /* 보조 텍스트 */
+      --color-gray-700: #4e5968;
+      /* 본문 텍스트 */
+
+      /* 폰트 */
+      --font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+
+      /* 레이아웃 */
+      --slide-width: 1200px;
+      --slide-ratio: 16/9;
+      --slide-padding: 60px;
+    }
+
+    /* =========================================
+       2. 기본 스타일 (Reset & Base)
+       ========================================= */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background-color: #f0f0f0;
+      /* 전체 배경은 구분되게 약간 어둡게 */
+      color: var(--color-primary);
+      line-height: 1.6;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4 {
+      line-height: 1.3;
+      font-weight: 700;
+      word-break: keep-all;
+    }
+
+    p {
+      word-break: keep-all;
+    }
+
+    ul {
+      list-style: none;
+    }
+
+    /* =========================================
+       3. 슬라이드 컨테이너 (Slide Layout)
+       ========================================= */
+    .deck-container {
+      width: 100%;
+      max-width: var(--slide-width);
+      display: flex;
+      flex-direction: column;
+      gap: 40px;
+      /* 슬라이드 간 간격 */
+    }
+
+    .slide {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background-color: var(--color-secondary);
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      padding: var(--slide-padding);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      page-break-inside: avoid;
+      /* 인쇄 시 잘림 방지 */
+    }
+
+    /* 슬라이드 번호 */
+    .slide-number {
+      position: absolute;
+      bottom: 30px;
+      right: 40px;
+      font-size: 14px;
+      color: var(--color-gray-500);
+    }
+
+    /* =========================================
+       4. 공통 컴포넌트 (Components)
+       ========================================= */
+    /* 강조 바 (상단 타이틀 위) */
+    .accent-bar {
+      width: 60px;
+      height: 6px;
+      background-color: var(--color-primary);
+      margin-bottom: 24px;
+      border-radius: 3px;
+    }
+
+    /* 타이틀 스타일 */
+    .slide-title {
+      font-size: 42px;
+      margin-bottom: 16px;
+      color: var(--color-primary);
+    }
+
+    .slide-subtitle {
+      font-size: 24px;
+      color: var(--color-gray-700);
+      font-weight: 500;
+    }
+
+    /* 본문 텍스트 크기 */
+    .text-lg {
+      font-size: 28px;
+      line-height: 1.5;
+    }
+
+    .text-md {
+      font-size: 22px;
+      line-height: 1.6;
+    }
+
+    .text-sm {
+      font-size: 18px;
+      line-height: 1.6;
+    }
+
+    /* 강조 텍스트 */
+    .highlight {
+      color: var(--color-primary);
+      font-weight: 700;
+      background: linear-gradient(180deg, transparent 65%, rgba(0, 0, 0, 0.1) 65%);
+    }
+
+    /* 리스트 스타일 */
+    .custom-list li {
+      position: relative;
+      padding-left: 32px;
+      margin-bottom: 16px;
+      font-size: 22px;
+      color: var(--color-gray-700);
+    }
+
+    .custom-list li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: var(--color-primary);
+      font-size: 1.5em;
+      line-height: 1;
+      top: -2px;
+    }
+
+    /* 이미지 컨테이너 */
+    .img-placeholder {
+      width: 100%;
+      height: 100%;
+      background-color: var(--color-gray-100);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border: 1px solid var(--color-gray-200);
+    }
+
+    .img-placeholder img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .img-caption {
+      margin-top: 12px;
+      font-size: 14px;
+      color: var(--color-gray-500);
+      text-align: center;
+    }
+
+    /* =========================================
+       5. 슬라이드별 변형 (Variations)
+       ========================================= */
+    /* 표지 슬라이드 */
+    .slide-cover {
+      background-color: var(--color-primary);
+      color: var(--color-secondary);
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    .slide-cover .slide-title {
+      color: var(--color-secondary);
+      font-size: 64px;
+      margin-bottom: 20px;
+    }
+
+    .slide-cover .slide-subtitle {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 28px;
+    }
+
+    /* 중앙 정렬 슬라이드 */
+    .slide-center {
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    /* 2열 레이아웃 */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      height: 100%;
+      align-items: center;
+    }
+
+    /* 강조 박스 */
+    .info-box {
+      background-color: var(--color-gray-100);
+      padding: 40px;
+      border-radius: 16px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      height: 100%;
+    }
+
+    .info-number {
+      font-size: 80px;
+      font-weight: 800;
+      color: var(--color-primary);
+      margin-bottom: 16px;
+      letter-spacing: -2px;
+    }
+
+    .info-label {
+      font-size: 24px;
+      color: var(--color-gray-700);
+      font-weight: 600;
+    }
+
+    /* 팀원 카드 */
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 30px;
+      margin-top: 40px;
+    }
+
+    .team-card {
+      background: var(--color-secondary);
+      border: 1px solid var(--color-gray-200);
+      border-radius: 12px;
+      padding: 30px 20px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    }
+
+    .team-img {
+      width: 100px;
+      height: 100px;
+      background: var(--color-gray-100);
+      border-radius: 50%;
+      margin: 0 auto 20px;
+      overflow: hidden;
+    }
+
+    .team-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .team-name {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .team-role {
+      font-size: 16px;
+      color: var(--color-primary);
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .team-desc {
+      font-size: 15px;
+      color: var(--color-gray-700);
+      word-break: keep-all;
+    }
+
+    /* 인쇄용 설정 */
+    @media print {
+      body {
+        padding: 0;
+        background: white;
+      }
+
+      .deck-container {
+        gap: 0;
+      }
+
+      .slide {
+        box-shadow: none;
+        border: 1px solid #ddd;
+        margin-bottom: 0;
+        page-break-after: always;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="deck-container">
+
+    <!-- 슬라이드 표지 -->
+    <div class="slide slide-cover" style="padding-bottom: 140px;">
+      <img src="FlowCoder_notext.png" alt="FlowCoder Logo" style="width: 150px; margin-bottom: 10px;">
+      <h1 class="slide-title">FlowCoder 성장일기</h1>
+      <p class="slide-subtitle">실패를 거름 삼아 성공을 찾아가는 여정</p>
+      <img src="NEXT_logo_Dark-removebg.png" alt="NEXT Logo"
+        style="position: absolute; bottom: 30px; right: 40px; width: 100px;">
+    </div>
+
+    <!-- 슬라이드 1 -->
+    <div class="slide">
+      <div class="accent-bar"></div>
+      <h2 class="slide-title">커리어의 시작점</h2>
+      <div class="grid-2">
+        <div class="info-box">
+          <div class="info-number">127억</div>
+          <div class="info-label">누적 지원사업 성과</div>
+        </div>
+        <div style="display: flex; flex-direction: column; justify-content: center;">
+          <p class="text-lg">
+            "지원사업 관련해서는<br>
+            <span class="highlight">누구에게도 뒤지지 않는 커리어</span>를<br>
+            쌓았다고 자부했습니다."
+          </p>
+        </div>
+      </div>
+      <span class="slide-number">01</span>
+    </div>
+
+    <!-- 슬라이드 2 -->
+    <div class="slide slide-center" style="background-color: var(--color-primary); color: white;">
+      <div>
+        <h2 style="font-size: 48px; margin-bottom: 30px;">하지만 사업은<br>만만치 않았습니다.</h2>
+        <p style="font-size: 24px; color: rgba(255,255,255,0.8);">5년간의 사업은 결국 실패로 남았습니다.</p>
+      </div>
+      <span class="slide-number" style="color: rgba(255,255,255,0.5);">02</span>
+    </div>
+
+    <!-- 슬라이드 3 -->
+    <div class="slide">
+      <div class="accent-bar"></div>
+      <h2 class="slide-title">실패의 원인</h2>
+      <div style="margin-top: 40px;">
+        <div style="display: flex; gap: 30px; margin-bottom: 30px; align-items: flex-start;">
+          <div style="font-size: 60px; font-weight: 800; color: var(--color-gray-200); line-height: 1;">01</div>
+          <div>
+            <h4 style="font-size: 26px; margin-bottom: 10px;">무리한 사업 전환</h4>
+            <p class="text-md" style="color: var(--color-gray-700);">하드웨어 기반 제조에서 플랫폼 사업으로의 급격한 전환 시도</p>
+          </div>
+        </div>
+        <div style="display: flex; gap: 30px; margin-bottom: 30px; align-items: flex-start;">
+          <div style="font-size: 60px; font-weight: 800; color: var(--color-gray-200); line-height: 1;">02</div>
+          <div>
+            <h4 style="font-size: 26px; margin-bottom: 10px;">SW 역량의 부재</h4>
+            <p class="text-md" style="color: var(--color-gray-700);">SW 관련 지식 전무, 내부 개발자 없이 전적으로 외주에 의존</p>
+          </div>
+        </div>
+        <div style="display: flex; gap: 30px; align-items: flex-start;">
+          <div style="font-size: 60px; font-weight: 800; color: var(--color-gray-200); line-height: 1;">03</div>
+          <div>
+            <h4 style="font-size: 26px; margin-bottom: 10px;">자금 고갈과 유지력 상실</h4>
+            <p class="text-md" style="color: var(--color-gray-700);">위의 두 가지 원인이 겹쳐 자금난으로 이어짐</p>
+          </div>
+        </div>
+      </div>
+      <span class="slide-number">03</span>
+    </div>
+
+    <!-- 슬라이드 4 -->
+    <div class="slide">
+      <div class="accent-bar"></div>
+      <h2 class="slide-title">새로운 모색</h2>
+      <div class="grid-2">
+        <div style="display: flex; flex-direction: column; justify-content: center;">
+          <p class="text-lg" style="margin-bottom: 30px;">
+            정규직과 프리랜서를 오가며 안정을 찾는 동안,<br>
+            <span class="highlight">무자본으로 수익화</span> 할 수 있는<br>
+            방법들을 찾기 시작했습니다.
+          </p>
+          <ul class="custom-list">
+            <li>다양한 노코드 툴 활용 실험</li>
+            <li>업무 자동화 시도</li>
+            <li>자체 서비스 개발 도전</li>
+          </ul>
+        </div>
+        <div class="img-placeholder" style="background: transparent; border: none;">
+          <!-- 일러스트나 아이콘이 들어가면 좋은 자리 -->
+          <div style="font-size: 100px;">🛠️ 🧩 🚀</div>
+        </div>
+      </div>
+      <span class="slide-number">04</span>
+    </div>
+
+    <!-- 슬라이드 5 -->
+    <div class="slide">
+      <div class="accent-bar"></div>
+      <h2 class="slide-title">첫 결과물: Konarae</h2>
+      <div class="grid-2">
+        <div>
+          <h3 style="font-size: 32px; margin-bottom: 20px;">지원사업 매칭 & 사업계획서 도우미</h3>
+          <p class="text-md" style="color: var(--color-gray-700); margin-bottom: 40px;">
+            저의 경험과 노코드 기술을 결합하여<br>
+            지원사업을 준비하는 분들을 위한<br>
+            매칭 서비스를 런칭했습니다.
+          </p>
+        </div>
+        <div>
+          <a href="https://konarae-app.vercel.app/" target="_blank" style="display: block; width: 100%; height: 100%;">
+            <div class="img-placeholder">
+              <!-- 이미지 영역 -->
+              <img src="Konarae_old.png" alt="Konarae 서비스 예시 화면">
+            </div>
+          </a>
+          <div class="img-caption">Konarae 서비스 목업 이미지</div>
+        </div>
+      </div>
+      <span class="slide-number">05</span>
+    </div>
+
+    <!-- 슬라이드 6 -->
+    <div class="slide">
+      <div class="accent-bar"></div>
+      <h2 class="slide-title">또 다른 작은 실패</h2>
+      <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
+        <div style="background-color: #fff0f0; border-left: 6px solid #ff4d4f; padding: 40px; border-radius: 8px;">
+          <h3 style="font-size: 28px; margin-bottom: 16px; color: #ff4d4f;">⚠️ 예상치 못한 외부 요인</h3>
+          <p class="text-md" style="margin-bottom: 20px;">
+            'Konarae'는 첫 결과물이라 개발 호흡이 너무 길었습니다.<br>
+            설상가상으로 <strong>26년 말, 정부 주도로 똑같은 서비스가 오픈</strong>된다는 소식을 접했습니다.
+          </p>
+          <p class="text-lg" style="font-weight: 700;">
+            "시장의 속도와 타이밍을 놓친 또 한번의 아픈 경험이었습니다."
+          </p>
+        </div>
+      </div>
+      <span class="slide-number">06</span>
+    </div>
+
+    <!-- 슬라이드 7 -->
+    <div class="slide">
+      <div class="accent-bar"></div>
+      <h2 class="slide-title">전환점: 오즈코딩스쿨 & 사업개발캠프</h2>
+      <div class="grid-2">
+        <div style="display: flex; flex-direction: column; justify-content: center;">
+          <p class="text-lg">
+            여기서 멈추지 않았습니다.<br>
+            캠프를 통해 부족했던 <span class="highlight">SW 역량</span>을 채웠습니다.
+          </p>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 20px; justify-content: center;">
+          <div
+            style="background: var(--color-gray-100); padding: 24px; border-radius: 12px; display: flex; align-items: center; gap: 20px;">
+            <span style="font-size: 32px;">💻</span>
+            <span class="text-md" style="font-weight: 600;">직접 코딩을 배우다</span>
+          </div>
+          <div
+            style="background: var(--color-gray-100); padding: 24px; border-radius: 12px; display: flex; align-items: center; gap: 20px;">
+            <span style="font-size: 32px;">⚡</span>
+            <span class="text-md" style="font-weight: 600;">바이브코딩 역량 강화</span>
+          </div>
+          <div
+            style="background: var(--color-gray-100); padding: 24px; border-radius: 12px; display: flex; align-items: center; gap: 20px;">
+            <span style="font-size: 32px;">🤝</span>
+            <span class="text-md" style="font-weight: 600;">최고의 팀원들을 만나다</span>
+          </div>
+        </div>
+      </div>
+      <span class="slide-number">07</span>
+    </div>
+
+    <!-- 슬라이드 8 -->
+    <div class="slide">
+      <div class="accent-bar"></div>
+      <h2 class="slide-title">체계화와 기반 마련</h2>
+      <div class="grid-2">
+        <div class="info-box" style="background-color: var(--color-primary); color: white;">
+          <h3 style="font-size: 32px; margin-bottom: 20px;">Service Factory</h3>
+          <p class="text-md" style="color: rgba(255,255,255,0.8);">
+            바이브코딩을 체계화하여<br>
+            기능적으로 완성도 높은 서비스를<br>
+            빠르게 찍어낼 수 있는 기반 확보
+          </p>
+        </div>
+        <div class="info-box">
+          <h3 style="font-size: 32px; margin-bottom: 20px;">Knowledge Community</h3>
+          <p class="text-md" style="color: var(--color-gray-700);">
+            저희의 결과물을 공유하고<br>
+            개발/사업 지식을 나누기 위한<br>
+            커뮤니티 생태계 구축 중
+          </p>
+        </div>
+      </div>
+      <span class="slide-number">08</span>
+    </div>
+
+    <!-- 슬라이드 9 -->
+    <div class="slide">
+      <div class="accent-bar"></div>
+      <h2 class="slide-title">가속화되는 결과물</h2>
+      <p class="slide-subtitle" style="margin-bottom: 30px;">캠프 6개월간 누구보다 많은 서비스를 만들었고, 그 속도는 점점 빨라지고 있습니다.</p>
+
+      <div style="flex: 1; display: flex; justify-content: center; align-items: center; overflow: hidden;">
+        <a href="https://about.flow-coder.com/" target="_blank"
+          style="display: block; width: 100%; height: 100%; text-decoration: none;">
+          <div class="img-placeholder">
+            <img src="FlowCoder_landing.jpeg" alt="포트폴리오">
+          </div>
+        </a>
+      </div>
+      <span class="slide-number">09</span>
+    </div>
+
+    <!-- 슬라이드 10 -->
+    <div class="slide slide-center">
+      <div style="max-width: 900px;">
+        <h2 style="font-size: 36px; line-height: 1.6; margin-bottom: 40px;">
+          "캠프에서 배운대로 빠른 서비스 런칭과<br>
+          시장 검증을 통해 <span class="highlight">지속적인 수익모델</span>을<br>
+          반드시 찾아낼 것입니다."
+        </h2>
+        <p class="text-md" style="color: var(--color-gray-500);">
+          저희는 각자 성공의 경험은 없으나,<br>
+          캠프를 발판으로 실패를 거름 삼아 성공을 찾는 여정을 계속 할 것입니다.
+        </p>
+      </div>
+      <span class="slide-number">10</span>
+    </div>
+
+    <!-- 슬라이드 11 -->
+    <div class="slide">
+      <div class="accent-bar"></div>
+      <h2 class="slide-title">감사의 마음</h2>
+      <div class="grid-2">
+        <div class="info-box" style="align-items: flex-start; text-align: left;">
+          <h3 style="font-size: 28px; margin-bottom: 16px;">To. 캠프 운영진분들</h3>
+          <p class="text-md" style="color: var(--color-gray-700);">
+            저희가 성장할 수 있는 환경을 만들어주시고,<br>
+            방향을 잃지 않게 이끌어주셔서<br>
+            진심으로 감사드립니다.
+          </p>
+        </div>
+        <div class="info-box"
+          style="align-items: flex-start; text-align: left; background-color: white; border: 1px solid var(--color-gray-200);">
+          <h3 style="font-size: 28px; margin-bottom: 16px;">To. 1기 수강생 여러분</h3>
+          <p class="text-md" style="color: var(--color-gray-700);">
+            함께 고민하고 서로 도우며 많은 자극과 위로를<br>
+            받았습니다.<br>
+            모두의 성공을 응원합니다.
+          </p>
+        </div>
+      </div>
+      <span class="slide-number">11</span>
+    </div>
+
+    <!-- 슬라이드 12 -->
+    <div class="slide slide-center" style="background-color: var(--color-primary); color: white;">
+      <h2 style="font-size: 42px; margin-bottom: 30px;">FlowCoder의 여정에<br>함께해주시기 바랍니다.</h2>
+      <p class="text-md" style="color: rgba(255,255,255,0.8);">
+        성장 과정을 보여드리고, 서비스를 소개하고,<br>
+        지식을 공유하며 함께 성장했으면 합니다.
+      </p>
+      <span class="slide-number" style="color: rgba(255,255,255,0.5);">12</span>
+    </div>
+
+    <!-- 슬라이드 13 -->
+    <div class="slide">
+      <div class="accent-bar"></div>
+      <h2 class="slide-title">Team FlowCoder</h2>
+      <p class="slide-subtitle">각자의 전문성으로 시너지를 만드는 팀</p>
+
+      <div class="team-grid">
+        <!-- 박현일 -->
+        <div class="team-card">
+          <div class="team-img">
+            <img src="https://placehold.co/200x200/333/fff?text=P" alt="박현일">
+          </div>
+          <h3 class="team-name">박현일</h3>
+          <div class="team-role">FDP 시스템 & 바이브코딩 연구</div>
+          <p class="team-desc">자동화 연구를 통해<br>서비스 제작 효율 극대화</p>
+        </div>
+
+        <!-- 조용현 -->
+        <div class="team-card">
+          <div class="team-img">
+            <img src="https://placehold.co/200x200/333/fff?text=J" alt="조용현">
+          </div>
+          <h3 class="team-name">조용현</h3>
+          <div class="team-role">UI 시스템 & 개발 프로세스</div>
+          <p class="team-desc">견고한 UI 시스템 구축 및<br>개발 자동화 리드</p>
+        </div>
+
+        <!-- 김호천 -->
+        <div class="team-card">
+          <div class="team-img">
+            <img src="https://placehold.co/200x200/333/fff?text=K" alt="김호천">
+          </div>
+          <h3 class="team-name">김호천</h3>
+          <div class="team-role">커뮤니티 관리 & 미디어</div>
+          <p class="team-desc">커뮤니티 활성화 및<br>영상 콘텐츠 제작 총괄</p>
+        </div>
+      </div>
+      <span class="slide-number">13</span>
+    </div>
+
+    <!-- 슬라이드 14 -->
+    <div class="slide slide-center">
+      <img src="FlowCoder_notext.png" alt="FlowCoder Logo" style="width: 150px; margin-bottom: 10px;">
+      <h2 class="slide-title" style="margin-bottom: 40px;">FlowCoder Contact</h2>
+      <img src="NEXT_logo_White.png" alt="NEXT Logo"
+        style="position: absolute; bottom: 30px; right: 40px; width: 100px;">
+      <div style="display: flex; gap: 30px; justify-content: center; align-items: center;">
+        <a href="https://discord.gg/4VzBTDjQUc" target="_blank" style="display: block; transition: transform 0.2s;">
+          <img src="https://i.ibb.co/S43L3LGB/image.png" alt="Discord" width="60" height="60">
+        </a>
+        <a href="https://www.flow-coder.com/" target="_blank" style="display: block; transition: transform 0.2s;">
+          <img src="https://i.ibb.co/Z6S6SbL4/image.png" alt="Home" width="60" height="60">
+        </a>
+        <a href="https://about.flow-coder.com/" target="_blank" style="display: block; transition: transform 0.2s;">
+          <img src="https://i.ibb.co/SDJT2Zyw/image.png" alt="About" width="60" height="60">
+        </a>
+        <a href="http://www.youtube.com/@FlowCoder25" target="_blank"
+          style="display: block; transition: transform 0.2s;">
+          <img src="https://i.ibb.co/YBKSKWNN/image.png" alt="YouTube" width="60" height="60">
+        </a>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // 간단한 키보드 네비게이션 스크립트 (화면 스크롤)
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+        window.scrollBy({ top: window.innerHeight, behavior: 'smooth' });
+        e.preventDefault();
+      } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+        window.scrollBy({ top: -window.innerHeight, behavior: 'smooth' });
+        e.preventDefault();
+      }
+    });
+  </script>
+</body>
+
+</html>
